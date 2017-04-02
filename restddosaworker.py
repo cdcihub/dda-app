@@ -15,6 +15,7 @@ import socket
 import datamirror
 import isdcclient
 import subprocess
+import json
 
 context=socket.gethostname()
 
@@ -34,10 +35,11 @@ def run_dda(target,modules,assume):
     try:
         p.wait()
         r=p.stdout.read()
-        return r
+        d=json.load(open("object_data.json"))
+        return r,d
     except Exception as e:
         r=('ERROR',repr(e),p.stdout.read())
-        return r
+        return r,None
 
 @app.route('/integral-ddosa-worker/api/v1.0/<string:target>', methods=['GET'])
 def ddosaworker(target):
@@ -51,10 +53,10 @@ def ddosaworker(target):
         assume=request.args['assume']
 
 
-    result=run_dda(target,modules,assume)
+    result,data=run_dda(target,modules,assume)
 
 
-    r={'modules':modules,'assume':assume,'result':result}
+    r={'modules':modules,'assume':assume,'result':result,'data':data}
 
     return jsonify(r)
 
