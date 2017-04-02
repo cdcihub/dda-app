@@ -1,10 +1,10 @@
 from distutils.core import setup
 
 setup(
-        name='integral-timesystem',
+        name='integral-ddosa-worker',
         version='1.0',
-        py_modules= ['timesystem','resttimesystem'],
-        scripts=["resttimesystem.sh"],
+        py_modules= ['restddosaworker'],
+        scripts=["restddosaworker.sh"],
         package_data     = {
             "": [
                 "*.txt",
