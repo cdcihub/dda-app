@@ -23,7 +23,7 @@ app = Flask(__name__)
 
 
 def run_dda(target,modules,assume):
-    cmd=["rundda.py",target,"-j"]
+    cmd=["rundda.py",target,"-j","-c"]
 
     dlog(logging.INFO,"starting "+repr(cmd))
     
@@ -45,10 +45,12 @@ def run_dda(target,modules,assume):
 
         p.wait()
         d=json.load(open("object_data.json"))
-        return all_output,d
+        h=open("reduced_hashe.txt").read()
+        cps=[l.split()[1] for l in open("object_url.txt")]
+        return all_output,d,h,cps
     except Exception as e:
         r=('ERROR',repr(e),p.stdout.read())
-        return r,None
+        return r,None,None,None
 
 @app.route('/integral-ddosa-worker/api/v1.0/<string:target>', methods=['GET'])
 def ddosaworker(target):
@@ -62,10 +64,10 @@ def ddosaworker(target):
         assume=request.args['assume']
 
 
-    result,data=run_dda(target,modules,assume)
+    result,data,hashe,cached_path=run_dda(target,modules,assume)
 
 
-    r={'modules':modules,'assume':assume,'result':result,'data':data}
+    r={'modules':modules,'assume':assume,'result':result,'data':data,'hashe':hashe,'cached_path':cached_path}
 
     return jsonify(r)
 
