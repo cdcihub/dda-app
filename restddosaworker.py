@@ -44,12 +44,25 @@ def run_dda(target,modules,assume):
             all_output+=line
 
         p.wait()
-        d=json.load(open("object_data.json"))
-        h=open("reduced_hashe.txt").read()
-        cps=[l.split()[1] for l in open("object_url.txt")]
+
+        try:
+            d=json.load(open("object_data.json"))
+        except:
+            d="unreable"
+
+        try:
+            h=open("reduced_hashe.txt").read()
+        except:
+            h="unreable"
+
+        try:
+            cps=[l.split()[1] for l in open("object_url.txt")]
+        except:
+            cps="unreable"
+
         return all_output,d,h,cps
     except Exception as e:
-        r=('ERROR',repr(e),p.stdout.read())
+        r=('ERROR',repr(e),str(e),p.stdout.read())
         return r,None,None,None
 
 @app.route('/integral-ddosa-worker/api/v1.0/<string:target>', methods=['GET'])
