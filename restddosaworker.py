@@ -24,6 +24,8 @@ app = Flask(__name__)
 
 def run_dda(target,modules,assume):
     cmd=["rundda.py",target,"-j"]
+
+    dlog(logging.INFO,"starting "+repr(cmd))
     
     for module in modules:
         cmd+=["-m",module]
@@ -33,10 +35,17 @@ def run_dda(target,modules,assume):
 
     p=subprocess.Popen(cmd,stderr=subprocess.STDOUT,stdout=subprocess.PIPE)
     try:
+        all_output=""
+        while True:
+            line = p.stdout.readline()
+            if not line:
+                break
+            print '{log:heatool}',line,
+            all_output+=line
+
         p.wait()
-        r=p.stdout.read()
         d=json.load(open("object_data.json"))
-        return r,d
+        return all_output,d
     except Exception as e:
         r=('ERROR',repr(e),p.stdout.read())
         return r,None
@@ -72,6 +81,7 @@ if __name__ == '__main__':
     port=export_service("integral-ddosa-worker","/poke",interval=0.1,timeout=0.2)
 
     host=os.environ['EXPORT_SERVICE_HOST'] if 'EXPORT_SERVICE_HOST' in os.environ else '127.0.0.1'
+    dlog(logging.INFO,"starting integral-ddosa-worker")
     
     ##
     app.run(debug=False,port=port,host=host)
