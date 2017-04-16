@@ -12,7 +12,6 @@ from dlogging import logging
 from dlogging import log as dlog
 
 import socket
-import datamirror
 import isdcclient
 import subprocess
 import json
