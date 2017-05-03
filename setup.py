@@ -4,7 +4,6 @@ setup(
         name='integral-ddosa-worker',
         version='1.0',
         py_modules= ['restddosaworker'],
-        scripts=["restddosaworker.sh"],
         package_data     = {
             "": [
                 "*.txt",
