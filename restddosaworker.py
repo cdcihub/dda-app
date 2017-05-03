@@ -28,7 +28,7 @@ app = Flask(__name__)
 
 
 def run_dda(target,modules,assume):
-    cmd=["rundda.py",target,"-j"] # it's peculiar but it is a level of isolation
+    cmd=["rundda.py",target,"-j","-c"] # it's peculiar but it is a level of isolation
 
     dlog(logging.INFO,"starting "+repr(cmd))
     
