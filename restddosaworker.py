@@ -13,6 +13,8 @@ import ddosaauth
 import pilton
 import socket
 import subprocess
+from flask import request
+from flask import jsonify
 
 try:
     from dlogging import logging
@@ -28,7 +30,7 @@ context=socket.gethostname()
 app = Flask(__name__)
 
 def timestamp():
-    time.strftime("%Y-%m-%dT%H:%M:%S")
+    return time.strftime("%Y-%m-%dT%H:%M:%S")
 
 class Worker(object):
     task=None
@@ -46,6 +48,20 @@ class Worker(object):
             )
 
     def run_dda(self,target,modules,assume,client=None):
+        client=request.remote_addr
+
+        if self.task is not None:
+            r=dict(status='busy',task=self.task,output=self.all_output)
+            return r,None,None,None
+        
+        if target == "poke":
+            return self.all_output,self.format_status(),"",""
+        
+        if target == "history":
+            status=self.format_status()
+            status['history']=self.event_history
+            return self.all_output,status,"",""
+        
         self.event_history.append(dict(
             event='requested',
             target=target,
@@ -54,13 +70,6 @@ class Worker(object):
             client=client,
             timestamp=timestamp()
         ))
-
-        if self.task is not None:
-            r=dict(status='busy',task=self.task,output=self.all_output)
-            return r,None,None,None
-        
-        if target == "poke":
-            return self.all_output,self.format_status(),"",""
 
         if target.startswith("sleep"):
             self.task="sleeping"
