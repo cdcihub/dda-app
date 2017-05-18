@@ -143,7 +143,7 @@ class Worker(object):
             except:
                 cps="unreable"
 
-            return all_output,d,h,cps
+            return self.all_output,d,h,cps
         except Exception as e:
             if self.all_output=="":
                 self.all_output=p.stdout.read()
