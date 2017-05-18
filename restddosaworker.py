@@ -40,8 +40,8 @@ def run_dda(target,modules,assume):
 
     print "$ "+" ".join(cmd)
     p=subprocess.Popen(cmd,stderr=subprocess.STDOUT,stdout=subprocess.PIPE)
+    all_output=""
     try:
-        all_output=""
         while True:
             line = p.stdout.readline()
             if not line:
@@ -50,6 +50,9 @@ def run_dda(target,modules,assume):
             all_output+=line
 
         p.wait()
+
+        if p.returncode!=0:
+            raise Exception("rundda.py failed with code %i"%p.returncode)
 
         try:
             d=json.load(open("object_data.json"))
@@ -68,7 +71,10 @@ def run_dda(target,modules,assume):
 
         return all_output,d,h,cps
     except Exception as e:
-        r=('ERROR',repr(e),str(e),p.stdout.read())
+        if all_output=="":
+            all_output=p.stdout.read()
+
+        r=dict(status='ERROR',exception=repr(e),output=all_output)
         return r,None,None,None
 
 @app.route('/api/v1.0/<string:target>', methods=['GET'])
