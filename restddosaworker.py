@@ -27,7 +27,7 @@ context=socket.gethostname()
 app = Flask(__name__)
 
 
-def run_dda(target,modules,assume):
+def run_dda(target,modules,assume,token=None):
     cmd=["rundda.py",target,"-j","-c"] # it's peculiar but it is a level of isolation
 
     dlog(logging.INFO,"starting "+repr(cmd))
@@ -38,8 +38,13 @@ def run_dda(target,modules,assume):
     if assume!="":
         cmd+=["-a",assume]
 
+    environ=os.environ.copy()
+
+    if token is not None:
+        environ['OPENID_TOKEN']=token
+
     print "$ "+" ".join(cmd)
-    p=subprocess.Popen(cmd,stderr=subprocess.STDOUT,stdout=subprocess.PIPE)
+    p=subprocess.Popen(cmd,stderr=subprocess.STDOUT,stdout=subprocess.PIPE,env=environ)
     all_output=""
     try:
         while True:
@@ -89,8 +94,11 @@ def ddosaworker(target):
     if 'assume' in request.args:
         assume=request.args['assume']
 
+    token=None
+    if 'token' in request.args:
+        token=request.args['token']
 
-    result,data,hashe,cached_path=run_dda(target,modules,assume)
+    result,data,hashe,cached_path=run_dda(target,modules,assume,token=token)
 
     r={'modules':modules,'assume':assume,'result':result,'data':data,'hashe':hashe,'cached_path':cached_path}
 
