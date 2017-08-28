@@ -184,8 +184,11 @@ def ddosaworker(target):
     if 'inject' in request.args:
         inject=json.loads(request.args['inject'])
 
+    token=None
+    if 'token' in request.args:
+        token=request.args['token']
 
-    result,data,hashe,cached_path=the_one_worker.run_dda(target,modules,assume,inject)
+    result,data,hashe,cached_path=the_one_worker.run_dda(target,modules,assume,inject,token=token)
 
     r={'modules':modules,'assume':assume,'result':result,'data':data,'hashe':hashe,'cached_path':cached_path}
 
