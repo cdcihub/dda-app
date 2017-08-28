@@ -47,7 +47,7 @@ class Worker(object):
                 alive_since=self.alive_since,
             )
 
-    def run_dda(self,target,modules,assume,client=None):
+    def run_dda(self,target,modules,assume,inject,client=None):
         client=request.remote_addr
 
         if self.task is not None:
@@ -90,6 +90,14 @@ class Worker(object):
 
         if assume!="":
             cmd+=["-a",assume]
+
+        for inj in inject:
+            inj_fn=inj[0]+"_data_injection.json"
+            print("will inject",inj_fn)
+            print(" ...",inj)
+            json.dump(inj,open(inj_fn,"w"))
+            cmd+=["-i",inj_fn]
+
 
         print "$ "+" ".join(cmd)
         p=subprocess.Popen(cmd,stderr=subprocess.STDOUT,stdout=subprocess.PIPE)
@@ -162,6 +170,7 @@ the_one_worker=Worker()
 @app.route('/api/v1.0/<string:target>', methods=['GET'])
 @ddosaauth.requires_auth
 def ddosaworker(target):
+    print("args",request.args)
 
     modules=[]
     if 'modules' in request.args:
@@ -171,8 +180,12 @@ def ddosaworker(target):
     if 'assume' in request.args:
         assume=request.args['assume']
 
+    inject=[]
+    if 'inject' in request.args:
+        inject=json.loads(request.args['inject'])
 
-    result,data,hashe,cached_path=the_one_worker.run_dda(target,modules,assume)
+
+    result,data,hashe,cached_path=the_one_worker.run_dda(target,modules,assume,inject)
 
     r={'modules':modules,'assume':assume,'result':result,'data':data,'hashe':hashe,'cached_path':cached_path}
 
