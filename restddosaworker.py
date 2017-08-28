@@ -47,7 +47,7 @@ class Worker(object):
                 alive_since=self.alive_since,
             )
 
-    def run_dda(self,target,modules,assume,inject,client=None):
+    def run_dda(self,target,modules,assume,inject,client=None,token=None):
         client=request.remote_addr
 
         if self.task is not None:
