@@ -83,7 +83,7 @@ class Worker(object):
 
         cmd=["rundda.py",target,"-j","-c"] # it's peculiar but it is a level of isolation
 
-        dlog(logging.INFO,"starting "+repr(cmd))
+        dlog("starting "+repr(cmd),level=logging.INFO)
         
         for module in modules:
             cmd+=["-m",module]
@@ -208,7 +208,7 @@ if __name__ == '__main__':
         port=int(os.environ['EXPORT_SERVICE_PORT'])
 
     host=os.environ['EXPORT_SERVICE_HOST'] if 'EXPORT_SERVICE_HOST' in os.environ else '127.0.0.1'
-    dlog(logging.INFO,"starting integral-ddosa-worker")
+    dlog("starting integral-ddosa-worker",level=logging.INFO)
 
     ##
     app.run(debug=False,port=port,host=host,threaded=True)
