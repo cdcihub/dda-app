@@ -140,6 +140,11 @@ class Worker(object):
                 d=json.load(open("object_data.json"))
             except:
                 d="unreable"
+            
+            try:
+                exceptions=yaml.load(open("exception.yaml"))
+            except:
+                exceptions="unreable"
 
             try:
                 h=open("reduced_hashe.txt").read()
@@ -151,7 +156,7 @@ class Worker(object):
             except:
                 cps="unreable"
 
-            return self.all_output,d,h,cps
+            return self.all_output,d,h,cps,exceptions
         except Exception as e:
             if self.all_output=="":
                 self.all_output=p.stdout.read()
@@ -188,9 +193,9 @@ def ddosaworker(target):
     if 'token' in request.args:
         token=request.args['token']
 
-    result,data,hashe,cached_path=the_one_worker.run_dda(target,modules,assume,inject,token=token)
+    result,data,hashe,cached_path,exceptions=the_one_worker.run_dda(target,modules,assume,inject,token=token)
 
-    r={'modules':modules,'assume':assume,'result':result,'data':data,'hashe':hashe,'cached_path':cached_path}
+    r={'modules':modules,'assume':assume,'result':result,'data':data,'hashe':hashe,'cached_path':cached_path, 'exceptions':exceptions}
 
     return jsonify(r)
 
