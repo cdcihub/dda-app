@@ -168,7 +168,7 @@ class Worker(object):
             ))
 
             r=dict(status='ERROR',exception=repr(e),output=self.all_output)
-            return r,None,None,None
+            return r,None,None,None,None
 
 the_one_worker=Worker()
 
