@@ -159,10 +159,12 @@ class Worker(object):
             try:
                 exceptions=yaml.load(open("exception.yaml"))
             except Exception as e:
-                exceptions="unreable"
                 if rundda_exception is not None:
                     print("unable to read exception while rundda failed",e)
                     raise rundda_exception
+                else:
+                    exceptions=[]
+                    print("no exceptions")
 
             try:
                 h=open("reduced_hashe.txt").read()
