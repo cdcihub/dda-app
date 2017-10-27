@@ -144,9 +144,10 @@ class Worker(object):
             
             try:
                 exceptions=yaml.load(open("exception.yaml"))
-            except:
+            except Exception as e:
                 exceptions="unreable"
                 if rundda_exception is not None:
+                    print("unable to read exception while rundda failed",e)
                     raise rundda_exception
 
             try:
@@ -161,6 +162,7 @@ class Worker(object):
 
             return self.all_output,d,h,cps,exceptions
         except Exception as e:
+            print("exceptions:",e)
             if self.all_output=="":
                 self.all_output=p.stdout.read()
                 
