@@ -128,13 +128,14 @@ class Worker(object):
                 timestamp=timestamp()
             ))
 
+            rundda_exception=None
             if p.returncode!=0:
                 self.event_history.append(dict(
                     event='rundda failed',
                     cmd=cmd,
                     timestamp=timestamp()
                 ))
-                raise Exception("rundda.py failed with code %i"%p.returncode)
+                rundda_exception=Exception("rundda.py failed with code %i"%p.returncode)
 
             try:
                 d=json.load(open("object_data.json"))
@@ -145,6 +146,8 @@ class Worker(object):
                 exceptions=yaml.load(open("exception.yaml"))
             except:
                 exceptions="unreable"
+                if rundda_exception is not None:
+                    raise rundda_exception
 
             try:
                 h=open("reduced_hashe.txt").read()
