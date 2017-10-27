@@ -62,15 +62,15 @@ class Worker(object):
 
         if self.task is not None:
             r=dict(status='busy',task=self.task,output=self.all_output)
-            return r,None,None,None
+            return r,None,None,None,None
         
         if target == "poke":
-            return self.all_output,self.format_status(),"",""
+            return self.all_output,self.format_status(),"","",""
         
         if target == "history":
             status=self.format_status()
             status['history']=self.event_history
-            return self.all_output,status,"",""
+            return self.all_output,status,"","",""
         
         self.event_history.append(dict(
             event='requested',
@@ -88,7 +88,7 @@ class Worker(object):
                 self.all_output+="%i\n"%i
                 time.sleep(1)
             self.task=None
-            return '\nwell slept!\n\n'+self.all_output,{},"",""
+            return '\nwell slept!\n\n'+self.all_output,{},"","",""
 
         silentremove("object_data.json")
         silentremove("exception.yaml")
