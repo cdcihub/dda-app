@@ -33,6 +33,15 @@ app = Flask(__name__)
 def timestamp():
     return time.strftime("%Y-%m-%dT%H:%M:%S")
 
+import os, errno
+
+def silentremove(filename):
+    try:
+        os.remove(filename)
+    except OSError as e: # this would be "except OSError, e:" before Python 2.6
+        if e.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
+            raise # re-raise exception if a different error occurred
+
 class Worker(object):
     task=None
     all_output=None
@@ -81,6 +90,10 @@ class Worker(object):
             self.task=None
             return '\nwell slept!\n\n'+self.all_output,{},"",""
 
+        silentremove("object_data.json")
+        silentremove("exception.yaml")
+        silentremove("reduced_hashe.txt")
+        silentremove("object_url.txt")
 
         cmd=["rundda.py",target,"-j","-c"] # it's peculiar but it is a level of isolation
 
