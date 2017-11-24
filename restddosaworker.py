@@ -25,6 +25,8 @@ except ImportError:
     import logging
 
 
+import ddasentry
+
 context=socket.gethostname()
 
 app = Flask(__name__)
@@ -139,20 +141,24 @@ class Worker(object):
             try:
                 d=json.load(open("object_data.json"))
             except:
+                ddasentry.client.captureException()
                 d="unreable"
 
             try:
                 h=open("reduced_hashe.txt").read()
             except:
+                ddasentry.client.captureException()
                 h="unreable"
 
             try:
                 cps=[l.split()[1] for l in open("object_url.txt")]
             except:
+                ddasentry.client.captureException()
                 cps="unreable"
 
             return self.all_output,d,h,cps
         except Exception as e:
+            ddasentry.client.captureException()
             if self.all_output=="":
                 self.all_output=p.stdout.read()
                 
