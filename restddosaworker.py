@@ -116,7 +116,7 @@ class Worker(object):
 
 
         print "$ "+" ".join(cmd)
-        p=subprocess.Popen(cmd,stderr=subprocess.STDOUT,stdout=subprocess.PIPE)
+        p=subprocess.Popen(cmd,stderr=sys.stdout.fileno(),stdout=subprocess.PIPE)
 
         self.all_output=""
         try:
