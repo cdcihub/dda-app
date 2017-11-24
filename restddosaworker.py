@@ -5,6 +5,7 @@ import pylru
 
 import sys
 import time
+import yaml
 import json
 import re
 import os
@@ -34,6 +35,15 @@ app = Flask(__name__)
 def timestamp():
     return time.strftime("%Y-%m-%dT%H:%M:%S")
 
+import os, errno
+
+def silentremove(filename):
+    try:
+        os.remove(filename)
+    except OSError as e: # this would be "except OSError, e:" before Python 2.6
+        if e.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
+            raise # re-raise exception if a different error occurred
+
 class Worker(object):
     task=None
     all_output=None
@@ -54,15 +64,15 @@ class Worker(object):
 
         if self.task is not None:
             r=dict(status='busy',task=self.task,output=self.all_output)
-            return r,None,None,None
+            return r,None,None,None,None
         
         if target == "poke":
-            return self.all_output,self.format_status(),"",""
+            return self.all_output,self.format_status(),"","",""
         
         if target == "history":
             status=self.format_status()
             status['history']=self.event_history
-            return self.all_output,status,"",""
+            return self.all_output,status,"","",""
         
         self.event_history.append(dict(
             event='requested',
@@ -80,8 +90,12 @@ class Worker(object):
                 self.all_output+="%i\n"%i
                 time.sleep(1)
             self.task=None
-            return '\nwell slept!\n\n'+self.all_output,{},"",""
+            return '\nwell slept!\n\n'+self.all_output,{},"","",""
 
+        silentremove("object_data.json")
+        silentremove("exception.yaml")
+        silentremove("reduced_hashe.txt")
+        silentremove("object_url.txt")
 
         cmd=["rundda.py",target,"-j","-c"] # it's peculiar but it is a level of isolation
 
@@ -130,19 +144,30 @@ class Worker(object):
                 timestamp=timestamp()
             ))
 
+            rundda_exception=None
             if p.returncode!=0:
                 self.event_history.append(dict(
                     event='rundda failed',
                     cmd=cmd,
                     timestamp=timestamp()
                 ))
-                raise Exception("rundda.py failed with code %i"%p.returncode)
+                rundda_exception=Exception("rundda.py failed with code %i"%p.returncode)
 
             try:
                 d=json.load(open("object_data.json"))
             except:
                 ddasentry.client.captureException()
                 d="unreable"
+            
+            try:
+                exceptions=yaml.load(open("exception.yaml"))
+            except Exception as e:
+                if rundda_exception is not None:
+                    print("unable to read exception while rundda failed",e)
+                    raise rundda_exception
+                else:
+                    exceptions=[]
+                    print("no exceptions")
 
             try:
                 h=open("reduced_hashe.txt").read()
@@ -156,9 +181,10 @@ class Worker(object):
                 ddasentry.client.captureException()
                 cps="unreable"
 
-            return self.all_output,d,h,cps
+            return self.all_output,d,h,cps,exceptions
         except Exception as e:
             ddasentry.client.captureException()
+            print("exceptions:",e)
             if self.all_output=="":
                 self.all_output=p.stdout.read()
                 
@@ -169,7 +195,7 @@ class Worker(object):
             ))
 
             r=dict(status='ERROR',exception=repr(e),output=self.all_output)
-            return r,None,None,None
+            return r,None,None,None,None
 
 the_one_worker=Worker()
 
@@ -194,9 +220,9 @@ def ddosaworker(target):
     if 'token' in request.args:
         token=request.args['token']
 
-    result,data,hashe,cached_path=the_one_worker.run_dda(target,modules,assume,inject,token=token)
+    result,data,hashe,cached_path,exceptions=the_one_worker.run_dda(target,modules,assume,inject,token=token)
 
-    r={'modules':modules,'assume':assume,'result':result,'data':data,'hashe':hashe,'cached_path':cached_path}
+    r={'modules':modules,'assume':assume,'result':result,'data':data,'hashe':hashe,'cached_path':cached_path, 'exceptions':exceptions}
 
     return jsonify(r)
 
