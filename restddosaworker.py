@@ -183,7 +183,6 @@ class Worker(object):
 
             return self.all_output,d,h,cps,exceptions
         except Exception as e:
-            ddasentry.client.captureException()
             print("exceptions:",e)
             if self.all_output=="":
                 self.all_output=p.stdout.read()
@@ -195,6 +194,8 @@ class Worker(object):
             ))
 
             r=dict(status='ERROR',exception=repr(e),output=self.all_output)
+            
+            ddasentry.client.captureException(extra=r)
             return r,None,None,None,None
 
 the_one_worker=Worker()
