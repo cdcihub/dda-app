@@ -27,6 +27,7 @@ except ImportError:
 
 
 import ddasentry
+import ddalogzio
 
 context=socket.gethostname()
 
@@ -96,6 +97,8 @@ class Worker(object):
         silentremove("exception.yaml")
         silentremove("reduced_hashe.txt")
         silentremove("object_url.txt")
+
+        ddalogzio.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client))
 
         cmd=["rundda.py",target,"-j","-c"] # it's peculiar but it is a level of isolation
 

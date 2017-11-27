@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
         name='integral-ddosa-worker',
         version='1.0',
-        py_modules= ['restddosaworker','ddosaauth','ddasentry'],
+        py_modules= ['restddosaworker','ddosaauth','ddasentry','ddalogzio'],
         package_data     = {
             "": [
                 "*.txt",
