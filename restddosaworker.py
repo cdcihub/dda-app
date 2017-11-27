@@ -184,7 +184,10 @@ class Worker(object):
                 ddasentry.client.captureException()
                 cps="unreable"
 
-            ddalogzio.logger.info(dict(action="success: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions))
+            if len(exceptions)==0:
+                ddalogzio.logger.info(dict(action="success: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname()))
+            else:
+                ddalogzio.logger.warning(dict(action="success: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname()))
             return self.all_output,d,h,cps,exceptions
         except Exception as e:
             print("exceptions:",e)
@@ -199,7 +202,7 @@ class Worker(object):
 
             r=dict(status='ERROR',exception=repr(e),output=self.all_output)
             
-            ddalogzio.logger.error(dict(action="exception: returning",data=r,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token))
+            ddalogzio.logger.error(dict(action="exception: returning",data=r,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,hostname=socket.gethostname()))
             ddasentry.client.captureException(extra=r)
             return r,None,None,None,None
 
