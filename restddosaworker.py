@@ -159,7 +159,7 @@ class Worker(object):
             try:
                 d=json.load(open("object_data.json"))
             except:
-                ddasentry.client.captureException()
+               # ddasentry.client.captureException()
                 d="unreable"
             
             try:
@@ -175,19 +175,20 @@ class Worker(object):
             try:
                 h=open("reduced_hashe.txt").read()
             except:
-                ddasentry.client.captureException()
+                #ddasentry.client.captureException()
                 h="unreable"
 
             try:
                 cps=[l.split()[1] for l in open("object_url.txt")]
             except:
-                ddasentry.client.captureException()
+                #ddasentry.client.captureException()
                 cps="unreable"
 
             if len(exceptions)==0:
                 ddalogzio.logger.info(dict(action="success: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname()))
             else:
-                ddalogzio.logger.warning(dict(action="success: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname()))
+                ddasentry.client.captureMessage('Something went fundamentally wrong')
+                ddalogzio.logger.warning(dict(action="warning: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname()))
             return self.all_output,d,h,cps,exceptions
         except Exception as e:
             print("exceptions:",e)
