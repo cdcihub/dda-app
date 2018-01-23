@@ -60,7 +60,8 @@ class Worker(object):
                 alive_since=self.alive_since,
             )
 
-    def run_dda(self,target,modules,assume,inject,client=None,token=None):
+    def run_dda(self,target,modules,assume,inject,client=None,token=None,
+                prompt_delegate=False,callback=None):
         client=request.remote_addr
 
         if self.task is not None:
@@ -117,8 +118,14 @@ class Worker(object):
             json.dump(inj,open(inj_fn,"w"))
             cmd+=["-i",inj_fn]
 
+        if prompt_delegate:
+            cmd+=["-D",os.environ["DDA_QUEUE"]]
 
-        print "$ "+" ".join(cmd)
+        if callback is not None:
+            print("callback:",callback)
+            cmd+=["--callback",callback]
+
+        print("$ "+" ".join(cmd))
         p=subprocess.Popen(cmd,stderr=subprocess.STDOUT,stdout=subprocess.PIPE)
 
         self.all_output=""
@@ -209,9 +216,9 @@ class Worker(object):
 
 the_one_worker=Worker()
 
-@app.route('/api/v1.0/<string:target>', methods=['GET'])
+@app.route('/api/<string:api_version>/<string:target>', methods=['GET'])
 @ddosaauth.requires_auth
-def ddosaworker(target):
+def ddosaworker(api_version,target):
     print("args",request.args)
 
     modules=[]
@@ -230,7 +237,23 @@ def ddosaworker(target):
     if 'token' in request.args:
         token=request.args['token']
 
-    result,data,hashe,cached_path,exceptions=the_one_worker.run_dda(target,modules,assume,inject,token=token)
+    callback = None
+    if 'callback' in request.args:
+        callback = request.args['callback']
+
+    prompt_delegate = False
+    if api_version == "v2.0":
+        prompt_delegate=True
+
+    result,data,hashe,cached_path,exceptions=the_one_worker.run_dda(
+        target,
+        modules,
+        assume,
+        inject,
+        token=token,
+        prompt_delegate=prompt_delegate,
+        callback=callback,
+    )
 
     r={'modules':modules,'assume':assume,'result':result,'data':data,'hashe':hashe,'cached_path':cached_path, 'exceptions':exceptions}
 
