@@ -1,4 +1,5 @@
 #!flask/bin/python
+from __future__ import print_function
 
 from flask import Flask, url_for, jsonify, send_file, request
 import pylru
@@ -17,17 +18,18 @@ import subprocess
 from flask import request
 from flask import jsonify
 
-try:
-    from dlogging import logging
-    from dlogging import log as dlog
-except ImportError:
-    def dlog(*a,**aa):
-        print a,aa
-    import logging
 
-
+import logging
 import ddasentry
 import ddalogzio
+import ddalogstash
+    
+def dlog(*a,**aa):
+    level=logging.INFO
+    if 'level' in aa:
+        level=aa.pop('level')
+    ddalogstash.logger.log(level,*a,**aa)
+
 
 context=socket.gethostname()
 
@@ -99,7 +101,8 @@ class Worker(object):
         silentremove("reduced_hashe.txt")
         silentremove("object_url.txt")
 
-        ddalogzio.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname()))
+        ddalogzio.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback))
+        ddalogstash.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback))
 
         cmd=["rundda.py",target,"-j","-c"] # it's peculiar but it is a level of isolation
 
@@ -142,7 +145,7 @@ class Worker(object):
                 line = p.stdout.readline()
                 if not line:
                     break
-                print '{log:heatool}',line,
+                print('{log:heatool}',line,end='')
                 self.all_output+=line
 
             p.wait()
@@ -269,7 +272,7 @@ if __name__ == '__main__':
         os.environ['EXPORT_SERVICE_PORT']="%i"%pick_port("")
         port=export_service("integral-ddosa-worker","/poke",interval=0.1,timeout=0.2)
     except ImportError:
-        print "consular mode failed, standalone service"
+        print("consular mode failed, standalone service")
         port=int(os.environ['EXPORT_SERVICE_PORT'])
 
     host=os.environ['EXPORT_SERVICE_HOST'] if 'EXPORT_SERVICE_HOST' in os.environ else '127.0.0.1'
