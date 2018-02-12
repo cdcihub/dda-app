@@ -28,7 +28,9 @@ def dlog(*a,**aa):
     level=logging.INFO
     if 'level' in aa:
         level=aa.pop('level')
-    ddalogstash.logger.log(level,*a,**aa)
+    if len(a)==0:
+        a=["message"]
+    ddalogstash.logger.log(level,*a,extra=aa)
 
 
 context=socket.gethostname()
@@ -102,7 +104,7 @@ class Worker(object):
         silentremove("object_url.txt")
 
         ddalogzio.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback))
-        ddalogstash.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback))
+        dlog(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback)
 
         cmd=["rundda.py",target,"-j","-c"] # it's peculiar but it is a level of isolation
 
