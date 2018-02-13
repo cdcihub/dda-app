@@ -29,8 +29,8 @@ def dlog(*a,**aa):
     if 'level' in aa:
         level=aa.pop('level')
     if len(a)==0:
-        a=["message"]
-    ddalogstash.logger.log(level,*a,extra=aa)
+        a=[""]
+    ddalogstash.logger.log(level,a,extra=aa)
 
 
 context=socket.gethostname()
@@ -104,7 +104,7 @@ class Worker(object):
         silentremove("object_url.txt")
 
         ddalogzio.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback))
-        dlog(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback)
+        dlog("requested",action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback)
 
         cmd=["rundda.py",target,"-j","-c"] # it's peculiar but it is a level of isolation
 
@@ -128,6 +128,7 @@ class Worker(object):
 
         if callback is not None:
             print("callback:",callback)
+            dlog("setting callback",callback=callback)
             cmd+=["--callback",callback]
 
         print("$ "+" ".join(cmd))
@@ -167,6 +168,7 @@ class Worker(object):
                     timestamp=timestamp()
                 ))
                 rundda_exception=Exception("rundda.py failed with code %i"%p.returncode)
+                dlog("rundda returned",return_code=p.returncode)
 
             try:
                 d=json.load(open("object_data.json"))
@@ -176,6 +178,7 @@ class Worker(object):
             
             try:
                 exceptions=yaml.load(open("exception.yaml"))
+                dlog("rundda exception",exceptions=exceptions)
             except Exception as e:
                 if rundda_exception is not None:
                     print("unable to read exception while rundda failed",e)
@@ -197,10 +200,14 @@ class Worker(object):
                 cps="unreable"
 
             if len(exceptions)==0:
-                ddalogzio.logger.info(dict(action="success: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname()))
+                report=dict(action="success: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname())
+                ddalogzio.logger.info(report)
+                dlog(report['action'],**report)
             else:
                 ddasentry.client.captureMessage('Something went fundamentally wrong')
-                ddalogzio.logger.warning(dict(action="warning: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname()))
+                report=dict(action="warning: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname())
+                ddalogzio.logger.warning(report)
+                dlog(report['action'],**report)
             return self.all_output,d,h,cps,exceptions
         except Exception as e:
             print("exceptions:",e)
@@ -215,8 +222,10 @@ class Worker(object):
 
             r=dict(status='ERROR',exception=repr(e),output=self.all_output)
             
-            ddalogzio.logger.error(dict(action="exception: returning",data=r,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,hostname=socket.gethostname()))
+            report=dict(action="exception: returning",data=r,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,hostname=socket.gethostname())
+            ddalogzio.logger.error(report)
             ddasentry.client.captureException(extra=r)
+            dlog(report['action'],**report)
             return r,None,None,None,None
 
 the_one_worker=Worker()
