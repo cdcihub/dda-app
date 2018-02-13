@@ -30,7 +30,7 @@ def dlog(*a,**aa):
         level=aa.pop('level')
     if len(a)==0:
         a=[""]
-    ddalogstash.logger.log(level,a,extra=aa)
+    ddalogstash.logger.log(level,a,extra=dict(aa))
 
 
 context=socket.gethostname()
