@@ -286,7 +286,7 @@ if __name__ == '__main__':
         port=int(os.environ['EXPORT_SERVICE_PORT'])
 
     host=os.environ['EXPORT_SERVICE_HOST'] if 'EXPORT_SERVICE_HOST' in os.environ else '127.0.0.1'
-    dlog("starting integral-ddosa-worker",level=logging.INFO)
+    dlog("starting integral-ddosa-worker",level=logging.INFO,service_host=host,service_port=port)
 
     ##
     app.run(debug=False,port=port,host=host,threaded=True)
