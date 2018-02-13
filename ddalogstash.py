@@ -16,5 +16,6 @@ logger.addHandler(logstash.TCPLogstashHandler(host, 5000, version=1))
 extra = {
     'python version:':repr(sys.version_info),
 }
-logger.info('python-logstash: initializing', extra=extra)
 logger.addHandler(logging.StreamHandler())
+
+logger.info('python-logstash: initializing', extra=extra)

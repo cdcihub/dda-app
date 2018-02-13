@@ -21,16 +21,15 @@ from flask import jsonify
 
 import logging
 import ddasentry
-import ddalogzio
 import ddalogstash
+import ddalogzio
     
 def dlog(*a,**aa):
     level=logging.INFO
     if 'level' in aa:
         level=aa.pop('level')
-    if len(a)==0:
-        a=[""]
-    ddalogstash.logger.log(level,a,extra=dict(aa))
+    aa['message']="; ".join(a)
+    ddalogstash.logger.log(level,dict(aa))
 
 
 context=socket.gethostname()
