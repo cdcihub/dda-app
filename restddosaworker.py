@@ -29,7 +29,7 @@ def dlog(*a,**aa):
     if 'level' in aa:
         level=aa.pop('level')
     aa['message']="; ".join(a)
-    ddalogstash.logger.log(level,dict(aa))
+    ddalogstash.logger.log(level,json.dumps(dict(aa)))
 
 
 context=socket.gethostname()
