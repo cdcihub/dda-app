@@ -18,18 +18,17 @@ import subprocess
 from flask import request
 from flask import jsonify
 
-
 import logging
 import ddasentry
-import ddalogstash
 import ddalogzio
-    
+import ddalogstash
+
 def dlog(*a,**aa):
     level=logging.INFO
     if 'level' in aa:
         level=aa.pop('level')
-    aa['message']="; ".join(a)
-    ddalogstash.logger.log(level,json.dumps(dict(aa)))
+    message="; ".join(a)
+    ddalogstash.logger.log(level,message,extra=aa)
 
 
 context=socket.gethostname()
