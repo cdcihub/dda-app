@@ -5,7 +5,7 @@ import logging
 from logstash_formatter import LogstashFormatterV1
 
 logger = logging.getLogger()
-handler = logging.StreamHandler()
+handler = logging.StreamHandler(sys.stdout)
 formatter = LogstashFormatterV1()
 
 handler.setFormatter(formatter)
