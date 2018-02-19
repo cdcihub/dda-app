@@ -146,7 +146,8 @@ class Worker(object):
                 line = p.stdout.readline()
                 if not line:
                     break
-                print('{log:heatool}',line,end='')
+                print(line,end='')
+                #print('{log:heatool}',line,end='')
                 self.all_output+=line
 
             p.wait()
