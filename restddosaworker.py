@@ -167,7 +167,7 @@ class Worker(object):
                     timestamp=timestamp()
                 ))
                 rundda_exception=Exception("rundda.py failed with code %i"%p.returncode)
-                dlog("rundda returned",return_code=p.returncode)
+                dlog("rundda returned",return_code=p.returncode,output=self.all_output)
 
             try:
                 d=json.load(open("object_data.json"))
