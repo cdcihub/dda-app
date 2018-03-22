@@ -167,6 +167,7 @@ class Worker(object):
                     timestamp=timestamp()
                 ))
                 rundda_exception=Exception("rundda.py failed with code %i"%p.returncode)
+                print("failed, output:",self.all_output)
                 dlog("rundda returned",return_code=p.returncode,output=self.all_output)
 
             try:
