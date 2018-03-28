@@ -1,22 +1,24 @@
 #!flask/bin/python
 from __future__ import print_function
 
-from flask import Flask, url_for, jsonify, send_file, request
-import pylru
-
-import sys
-import time
-import yaml
 import json
-import re
-import os
-import requests
-import ddosaauth
-import pilton
+# import pilton
 import socket
 import subprocess
-from flask import request
+import time
+
+import yaml
+from flask import Flask
 from flask import jsonify
+from flask import request
+
+# import re
+# import os
+# import requests
+import ddosaauth
+
+# import pylru
+# import sys
 
 import logging
 import ddasentry
@@ -33,7 +35,10 @@ def dlog(*a,**aa):
 
 context=socket.gethostname()
 
-app = Flask(__name__)
+def create_app():
+    return Flask(__name__)
+
+app = create_app()
 
 def timestamp():
     return time.strftime("%Y-%m-%dT%H:%M:%S")
@@ -272,6 +277,8 @@ def ddosaworker(api_version,target):
     r={'modules':modules,'assume':assume,'result':result,'data':data,'hashe':hashe,'cached_path':cached_path, 'exceptions':exceptions}
 
     return jsonify(r)
+
+
 
 @app.route('/poke', methods=['GET'])
 def poke():
