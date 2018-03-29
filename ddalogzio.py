@@ -7,6 +7,6 @@ if os.environ.get('RESTDDOSAWORKER_LOGZIO_ENABLE','no')=='yes':
     logger = logging.getLogger('restddosaworkerLogzioLogger')
 
     logger.info('starting restddosaworker logzio logger')
-
-logger=logging.getLogger("logz")
+else:
+    logger=logging.getLogger("logz")
 
