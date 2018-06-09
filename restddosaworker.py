@@ -15,6 +15,7 @@ import ddosaauth
 import pilton
 import socket
 import subprocess
+import urlparse
 from flask import request
 from flask import jsonify
 
@@ -22,6 +23,7 @@ import logging
 import ddasentry
 import ddalogzio
 import ddalogstash
+import mattersend
 
 def dlog(*a,**aa):
     level=logging.INFO
@@ -103,6 +105,32 @@ class Worker(object):
 
         ddalogzio.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback))
         dlog("requested",action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback)
+
+        try:
+            url_params=urlparse.parse_qs(urlparse.urlparse(callback).query)
+        except:
+            url_params={'session_id':'?','job_id':'?'}
+
+        try:
+            mattersend.send(
+                                channel="request-log",
+                                message=
+                                    "|...|...|\n"+
+                                    "|------------: |:---------------|\n"+
+                                    "|sessionid|"+repr(url_params['session_id'])+"|\n"+
+                                    "|jobid|"+repr(url_params['job_id'])+"|\n"+
+                                    "|requested|"+repr(client)+"|\n"+
+                                    "|target|"+repr(target)+"|\n"+
+                                    "|modules|"+repr(modules)+"|\n"+
+                                    "|assume|"+re.sub(" +"," ",repr(assume))+"|\n"+
+                                    "|inject|"+repr(inject)+"|\n"
+                                ,
+                                url=open(os.environ.get("HOME")+"/.mattermost-request-log-hook").read().strip(),
+                                #syntax="markdown",
+                            )
+        except Exception as e:
+            dlog("mattermost problem",action="requested",exception=repr(e))
+            #ddasentry.client.captureException()
 
         cmd=["rundda.py",target,"-j","-c"] # it's peculiar but it is a level of isolation
 
@@ -204,7 +232,7 @@ class Worker(object):
                 ddalogzio.logger.info(report)
                 dlog(report['action'],**report)
             else:
-                ddasentry.client.captureMessage('Something went fundamentally wrong')
+                #ddasentry.client.captureMessage('Something went fundamentally wrong')
                 report=dict(action="warning: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname())
                 ddalogzio.logger.warning(report)
                 dlog(report['action'],**report)
@@ -224,7 +252,7 @@ class Worker(object):
             
             report=dict(action="exception: returning",data=r,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,hostname=socket.gethostname())
             ddalogzio.logger.error(report)
-            ddasentry.client.captureException(extra=r)
+            #ddasentry.client.captureException(extra=r)
             dlog(report['action'],**report)
             return r,None,None,None,None
 
