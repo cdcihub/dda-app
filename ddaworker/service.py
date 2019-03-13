@@ -306,6 +306,16 @@ def ddosaworker(api_version,target):
 def poke():
     return ""
 
+@app.route('/version', methods=['GET'])
+def version():
+    return dict(
+            container_commit = os.environ.get("CONTAINER_COMMIT","unknown"),
+            osa_version = dict(
+                    bundle_build = os.environ.get("OSA_VERSION", "unknown"),
+                    components = open("/osa/VERSION").read() if os.path.exists("/osa/VERSION") else "unknown",
+            ),
+        )
+
 if __name__ == '__main__':
     try:
         from export_service import export_service,pick_port
