@@ -1,9 +1,9 @@
 from distutils.core import setup
 
 setup(
-        name='integral-ddosa-worker',
+        name='dda-worker',
         version='1.0',
-        py_modules= ['restddosaworker','ddosaauth','ddasentry','ddalogzio','ddalogstash'],
+        packages=["ddaworker"],
         package_data     = {
             "": [
                 "*.txt",
