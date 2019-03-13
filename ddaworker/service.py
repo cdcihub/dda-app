@@ -17,7 +17,7 @@ import ddosaauth
 
 import logging
 import ddasentry
-import ddalogzio
+#import ddalogzio
 import ddalogstash
 import mattersend
 
@@ -102,7 +102,7 @@ class Worker(object):
         silentremove("reduced_hashe.txt")
         silentremove("object_url.txt")
 
-        ddalogzio.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback))
+        #ddalogzio.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback))
         dlog("requested",action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback)
 
         try:
@@ -228,12 +228,12 @@ class Worker(object):
 
             if len(exceptions)==0:
                 report=dict(action="success: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname())
-                ddalogzio.logger.info(report)
+                #ddalogzio.logger.info(report)
                 dlog(report['action'],**report)
             else:
                 #ddasentry.client.captureMessage('Something went fundamentally wrong')
                 report=dict(action="warning: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname())
-                ddalogzio.logger.warning(report)
+                #ddalogzio.logger.warning(report)
                 dlog(report['action'],**report)
             return self.all_output,d,h,cps,exceptions
         except Exception as e:
@@ -250,7 +250,7 @@ class Worker(object):
             r=dict(status='ERROR',exception=repr(e),output=self.all_output)
             
             report=dict(action="exception: returning",data=r,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,hostname=socket.gethostname())
-            ddalogzio.logger.error(report)
+            #ddalogzio.logger.error(report)
             #ddasentry.client.captureException(extra=r)
             dlog(report['action'],**report)
             return r,None,None,None,None
