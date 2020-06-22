@@ -2,8 +2,23 @@ from functools import wraps
 from flask import request, Response
 import os
 
+import logging
+
+logger=logging.getLogger(__name__)
+
 def get_server_auth():
-    return 'remoteintegral',open(os.environ['HOME']+"/.secret-ddosa-server").read().strip()
+    s={}
+    for n,m in [
+            ('env', lambda:os.environ.get("SECRET_DDOSA_SERVER")),
+            ('homefile', lambda:open(os.environ['HOME']+"/.secret-ddosa-server").read().strip()),
+           ]:
+        try:
+            return 'remoteintegral', m()
+        except Exception as e:
+            logger.debug(f"failed to get auth from {n}")
+            s[n]=repr(e)
+
+    raise Exception(f"unable to setup worker auth: {s}")
 
 server_auth=get_server_auth()
 
