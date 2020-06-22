@@ -301,6 +301,7 @@ def ddosaworker(api_version,target):
     return jsonify(r)
 
 
+@app.route('/', methods=['GET'])
 @app.route('/healthcheck', methods=['GET'])
 def healthcheck():
     return jsonify(dict(
