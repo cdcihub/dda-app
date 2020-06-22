@@ -1,5 +1,5 @@
 #!flask/bin/python
-from __future__ import print_function
+
 
 import json
 # import pilton
@@ -8,15 +8,15 @@ import subprocess
 import time
 
 import yaml
-import urlparse
+import urllib.parse
 from flask import Flask
 from flask import request
 from flask import jsonify
 
-import ddosaauth
+from . import ddosaauth
 
 import logging
-import ddasentry
+from . import ddasentry
 #import ddalogzio
 import ddalogstash
 import mattersend
@@ -106,7 +106,7 @@ class Worker(object):
         dlog("requested",action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback)
 
         try:
-            url_params=urlparse.parse_qs(urlparse.urlparse(callback).query)
+            url_params=urllib.parse.parse_qs(urllib.parse.urlparse(callback).query)
         except:
             url_params={'session_id':'?','job_id':'?'}
 
