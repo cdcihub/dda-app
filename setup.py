@@ -12,7 +12,7 @@ setup(
                 "*.py"
                 ]
             },
-        install_requires= ["flask", "raven", "logzio-python-handler", "pathlib", "mattersend"],
+        install_requires= ["flask", "raven", "pathlib", "mattersend"],
         license='Creative Commons Attribution-Noncommercial-Share Alike license',
         long_description=open('README.md').read(),
         )

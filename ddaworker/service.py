@@ -18,7 +18,7 @@ from . import ddosaauth
 import logging
 from . import ddasentry
 #import ddalogzio
-import ddalogstash
+from . import ddalogstash
 import mattersend
 
 def dlog(*a,**aa):
@@ -301,6 +301,18 @@ def ddosaworker(api_version,target):
     return jsonify(r)
 
 
+@app.route('/healthcheck', methods=['GET'])
+def healthcheck():
+    return jsonify(dict(
+            status="OK",
+            container_commit = os.environ.get("CONTAINER_COMMIT","unknown"),
+            osa_version = dict(
+                    bundle_build = os.environ.get("OSA_VERSION", "unknown"),
+                    components = open("/osa/VERSION").read() if os.path.exists("/osa/VERSION") else "unknown",
+            ),
+        ))
+
+
 
 @app.route('/poke', methods=['GET'])
 def poke():
@@ -319,11 +331,10 @@ def version():
 if __name__ == '__main__':
     try:
         from export_service import export_service,pick_port
-        os.environ['EXPORT_SERVICE_PORT']="%i"%pick_port("")
         port=export_service("integral-ddosa-worker","/poke",interval=0.1,timeout=0.2)
     except ImportError:
         print("consular mode failed, standalone service")
-        port=int(os.environ['EXPORT_SERVICE_PORT'])
+        port=8000
 
     host=os.environ['EXPORT_SERVICE_HOST'] if 'EXPORT_SERVICE_HOST' in os.environ else '127.0.0.1'
     dlog("starting integral-ddosa-worker",level=logging.INFO,service_host=host,service_port=port)
