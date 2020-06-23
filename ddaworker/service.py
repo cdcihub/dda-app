@@ -21,6 +21,8 @@ from . import ddasentry
 from . import ddalogstash
 import mattersend
 
+logger = logging.getLogger(__name__)
+
 def dlog(*a,**aa):
     level=logging.INFO
     if 'level' in aa:
@@ -170,7 +172,7 @@ class Worker(object):
             ))
 
             while True:
-                line = p.stdout.readline()
+                line = p.stdout.readline().decode()
                 if not line:
                     break
                 print(line,end='')
@@ -201,7 +203,7 @@ class Worker(object):
                 d=json.load(open("object_data.json"))
             except:
                # ddasentry.client.captureException()
-                d="unreable"
+                d="unreadable-object-data"
             
             try:
                 exceptions=yaml.load(open("exception.yaml"))
@@ -238,6 +240,7 @@ class Worker(object):
             return self.all_output,d,h,cps,exceptions
         except Exception as e:
             print("exceptions:",e)
+            print(traceback.format_exc())
             if self.all_output=="":
                 self.all_output=p.stdout.read()
                 
@@ -259,7 +262,7 @@ the_one_worker=Worker()
 
 @app.route('/api/<string:api_version>/<string:target>', methods=['GET'])
 @ddosaauth.requires_auth
-def ddosaworker(api_version,target):
+def evaluate(api_version,target):
     print("args",request.args)
 
     modules=[]

@@ -1,9 +1,8 @@
 import pytest
 
-from ddosaworker.restddosaworker import create_app
-
+import ddaworker.service
 
 @pytest.fixture
 def app():
-    app = create_app()
+    app = ddaworker.service.app
     return app
