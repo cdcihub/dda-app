@@ -25,6 +25,7 @@ def get_server_auth():
 server_auth=get_server_auth()
 
 def check_auth(username, password):
+    logger.warning("offerred %s %s, have %s %s", username, password, server_auth[0], server_auth[1])
     return username == server_auth[0] and password == server_auth[1]
 
 def authenticate():
