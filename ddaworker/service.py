@@ -329,6 +329,13 @@ def version():
             ),
         ))
 
+import traceback
+
+@app.errorhandler(Exception)
+def handle_any(e):
+    logger.warning(traceback.format_exc())
+    return 'bad request!', 400
+
 if __name__ == '__main__':
     try:
         from export_service import export_service,pick_port
