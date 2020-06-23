@@ -9,7 +9,7 @@ logger=logging.getLogger(__name__)
 def get_server_auth():
     s={}
     for n,m in [
-            ('env', lambda:os.environ.get("DDA_INTERFACE_TOKEN")),
+            ('env', lambda:os.environ.get("DDA_INTERFACE_TOKEN").strip()),
             ('homefile', lambda:open(os.environ['HOME']+"/.secret-ddosa-server").read().strip()),
            ]:
         try:
@@ -25,7 +25,6 @@ def get_server_auth():
 server_auth=get_server_auth()
 
 def check_auth(username, password):
-    logger.warning("offerred %s %s, have %s %s", username, password, server_auth[0], server_auth[1])
     return username == server_auth[0] and password == server_auth[1]
 
 def authenticate():
