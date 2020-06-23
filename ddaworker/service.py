@@ -247,7 +247,7 @@ class Worker(object):
                 timestamp=timestamp()
             ))
 
-            r=dict(status='ERROR',exception=repr(e),output=self.all_output)
+            r=dict(status='ERROR',exception=repr(e),output=self.all_output.decode())
             
             report=dict(action="exception: returning",data=r,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,hostname=socket.gethostname())
             #ddalogzio.logger.error(report)
@@ -286,7 +286,7 @@ def ddosaworker(api_version,target):
     if api_version == "v2.0":
         prompt_delegate=True
 
-    result,data,hashe,cached_path,exceptions=the_one_worker.run_dda(
+    result, data, hashe, cached_path, exceptions = the_one_worker.run_dda(
         target,
         modules,
         assume,
