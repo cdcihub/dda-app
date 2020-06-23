@@ -14,8 +14,8 @@ def get_server_auth():
            ]:
         try:
             r = 'remoteintegral', m()
-
             logger.info("got credentials from %s", n)
+            return r
         except Exception as e:
             logger.debug(f"failed to get auth from {n}")
             s[n]=repr(e)
