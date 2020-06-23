@@ -13,7 +13,9 @@ def get_server_auth():
             ('homefile', lambda:open(os.environ['HOME']+"/.secret-ddosa-server").read().strip()),
            ]:
         try:
-            return 'remoteintegral', m()
+            r = 'remoteintegral', m()
+
+            logger.info("got credentials from %s", n)
         except Exception as e:
             logger.debug(f"failed to get auth from {n}")
             s[n]=repr(e)
