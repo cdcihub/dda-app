@@ -9,7 +9,7 @@ logger=logging.getLogger(__name__)
 def get_server_auth():
     s={}
     for n,m in [
-            ('env', lambda:os.environ.get("SECRET_DDOSA_SERVER")),
+            ('env', lambda:os.environ.get("DDA_INTERFACE_TOKEN")),
             ('homefile', lambda:open(os.environ['HOME']+"/.secret-ddosa-server").read().strip()),
            ]:
         try:
