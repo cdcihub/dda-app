@@ -107,6 +107,8 @@ class Worker(object):
         #ddalogzio.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback))
         dlog("requested",action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback)
 
+        #TODO: try datalake here
+
         try:
             url_params=urllib.parse.parse_qs(urllib.parse.urlparse(callback).query)
         except:
