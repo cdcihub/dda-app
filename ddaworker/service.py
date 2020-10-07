@@ -153,7 +153,7 @@ class Worker(object):
             cmd+=["-i",inj_fn]
 
         if prompt_delegate:
-            cmd+=["-D",os.environ["DDA_QUEUE"]]
+            cmd+=["-D",os.environ["ODAHUB"]]
 
         if callback is not None:
             print("callback:",callback)
