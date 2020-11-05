@@ -12,7 +12,7 @@ setup(
                 "*.py"
                 ]
             },
-        install_requires= ["flask", "raven", "pathlib", "mattersend"],
+        install_requires= ["flask", "raven", "pathlib", "mattersend", "python-shell-colors"],
         license='Creative Commons Attribution-Noncommercial-Share Alike license',
         long_description=open('README.md').read(),
         )
