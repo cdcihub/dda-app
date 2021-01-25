@@ -5,6 +5,7 @@ import json
 # import pilton
 import socket
 import subprocess
+import random
 import time
 import glob
 
@@ -70,7 +71,15 @@ class Worker(object):
                 prompt_delegate=False,callback=None):
 
         cwd = os.getcwd()
-        nwd = os.path.join(cwd,timestamp())
+        nwd = os.path.join(cwd,
+                           target,
+                           time.strftime("%Y-%m"), 
+                           time.strftime("%d"), 
+                           time.strftime("%H-%M-%S") + f"-{os.getpid():i}-{random.getrandbits(32):08x}")
+        try:
+            os.makedirs(nwd)
+        except FileExistsError:
+            logger.warning("trying to create one time directory '%s', but already exists? suspicious", nwd)
 
         try:
             os.chdir(nwd)
