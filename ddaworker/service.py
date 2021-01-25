@@ -68,6 +68,21 @@ class Worker(object):
 
     def run_dda(self,target,modules,assume,inject,client=None,token=None,
                 prompt_delegate=False,callback=None):
+
+        cwd = os.getcwd()
+        nwd = os.path.join(cwd,timestamp())
+
+        try:
+            os.chdir(nwd)
+            self._run_dda(target,modules,assume,inject,client=None,token=None,
+                    prompt_delegate=False,callback=None)
+            os.chdir(cwd)
+        except Exception as e:
+            os.chdir(cwd)
+            raise
+
+    def _run_dda(self,target,modules,assume,inject,client=None,token=None,
+                prompt_delegate=False,callback=None):
         client=request.remote_addr
 
         if self.task is not None:
