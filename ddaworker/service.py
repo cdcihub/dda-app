@@ -198,7 +198,7 @@ class Worker(object):
                     timestamp=timestamp()
                 ))
                 rundda_exception=Exception("rundda.py failed with code %i"%p.returncode)
-                print("failed, output:",self.all_output)
+                print("\033[31mrunning workflow failed\033[0m")
                 dlog("rundda returned",return_code=p.returncode,output=self.all_output)
 
             try:
@@ -222,12 +222,14 @@ class Worker(object):
                 h=open("reduced_hashe.txt").read()
             except:
                 #ddasentry.client.captureException()
+                print("\033[31mERROR reading reduced_hashe.txt\033[0m, have", glob.glob("*"))
                 h="unreable"
 
             try:
                 cps=[l.split()[1] for l in open("object_url.txt")]
             except:
                 #ddasentry.client.captureException()
+                print("\033[31mERROR reading object_url.txt\033[0m, have", glob.glob("*"))
                 cps="unreable"
 
             if len(exceptions)==0:
