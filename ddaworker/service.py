@@ -75,7 +75,7 @@ class Worker(object):
                            target,
                            time.strftime("%Y-%m"), 
                            time.strftime("%d"), 
-                           time.strftime("%H-%M-%S") + f"-{os.getpid():i}-{random.getrandbits(32):08x}")
+                           time.strftime("%H-%M-%S") + f"-{os.getpid():d}-{random.getrandbits(32):08x}")
         try:
             os.makedirs(nwd)
         except FileExistsError:
