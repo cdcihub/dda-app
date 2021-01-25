@@ -228,6 +228,7 @@ class Worker(object):
 
             try:
                 cps=[l.split()[1] for l in open("object_url.txt")]
+                print("\033[32mSUCCESS reading object_url.txt\033[0m, have", cps)
             except:
                 #ddasentry.client.captureException()
                 print("\033[31mERROR reading object_url.txt\033[0m, have", glob.glob("*"))
