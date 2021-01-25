@@ -83,9 +83,10 @@ class Worker(object):
 
         try:
             os.chdir(nwd)
-            self._run_dda(target,modules,assume,inject,client=None,token=None,
+            R = self._run_dda(target,modules,assume,inject,client=None,token=None,
                     prompt_delegate=False,callback=None)
             os.chdir(cwd)
+            return R
         except Exception as e:
             os.chdir(cwd)
             raise
