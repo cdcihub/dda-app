@@ -234,7 +234,7 @@ class Worker(object):
                 d="unreadable-object-data"
             
             try:
-                exceptions=yaml.load(open("exception.yaml"), Loader=yaml.FullLoader)
+                exceptions=yaml.load(open("exception.yaml"), Loader=yaml.Loader)
                 dlog("rundda exception",exceptions=exceptions)
             except Exception as e:
                 if rundda_exception is not None:
