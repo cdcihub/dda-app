@@ -348,7 +348,7 @@ def evaluate(api_version,target):
             'exceptions': exceptions,
         }
 
-    return json.load(json.dumps(r, cls=JSON_Improved)) # make jsonifiable
+    return json.loads(json.dumps(r, cls=JSON_Improved)) # make jsonifiable
 
 
 @app.route('/', methods=['GET'])
