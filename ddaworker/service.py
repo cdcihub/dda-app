@@ -44,7 +44,7 @@ app = create_app()
 class JSON_Improved(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, dataanalysis.core.AnalysisDelegatedException):
-            return repr(obj)
+            return json.dumps(obj.__dict__)
         else:
             return super().default(obj)
 
