@@ -15,4 +15,4 @@ extra = {
     'python version:':repr(sys.version_info),
 }
 
-logger.info('python-logstash: initializing',extra)
+logger.info('python-logstash: initializing %s', extra)

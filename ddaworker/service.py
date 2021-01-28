@@ -1,12 +1,11 @@
 #!flask/bin/python
 
-
 import json
-# import pilton
 import socket
 import subprocess
 import random
 import time
+import re
 import glob
 
 import yaml
@@ -22,6 +21,8 @@ from . import ddasentry
 #import ddalogzio
 from . import ddalogstash
 import mattersend
+
+import dataanalysis.core
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,15 @@ def create_app():
     return Flask(__name__)
 
 app = create_app()
+
+class JSON_Improved(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, dataanalysis.core.AnalysisDelegatedException):
+            return repr(obj)
+        else:
+            return super().default(obj)
+
+app.json_encoder = JSON_Improved
 
 def timestamp():
     return time.strftime("%Y-%m-%dT%H:%M:%S")
