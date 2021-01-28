@@ -91,8 +91,8 @@ class Worker(object):
 
         try:
             os.chdir(nwd)
-            R = self._run_dda(target,modules,assume,inject,client=None,token=None,
-                    prompt_delegate=False,callback=None)
+            R = self._run_dda(target,modules,assume,inject,client=client,token=token,
+                    prompt_delegate=prompt_delegate,callback=callback)
             os.chdir(cwd)
             return R
         except Exception as e:
@@ -324,9 +324,9 @@ def evaluate(api_version,target):
     if 'callback' in request.args:
         callback = request.args['callback']
 
-    prompt_delegate = False
-    if api_version == "v2.0":
-        prompt_delegate=True
+    #if api_version == "v2.0":
+    prompt_delegate=True
+
 
     result, data, hashe, cached_path, exceptions = the_one_worker.run_dda(
         target,
