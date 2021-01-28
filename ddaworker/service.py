@@ -48,8 +48,6 @@ class JSON_Improved(json.JSONEncoder):
         else:
             return super().default(obj)
 
-app.json_encoder = JSON_Improved
-
 def timestamp():
     return time.strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -340,9 +338,17 @@ def evaluate(api_version,target):
         callback=callback,
     )
 
-    r={'modules':modules,'assume':assume,'result':result,'data':data,'hashe':hashe,'cached_path':cached_path, 'exceptions':exceptions}
+    r = {
+            'modules': modules,
+            'assume': assume,
+            'result': result,
+            'data': data,
+            'hashe': hashe,
+            'cached_path': cached_path,
+            'exceptions': exceptions,
+        }
 
-    return jsonify(r)
+    return json.load(json.dumps(r, cls=JSON_Improved)) # make jsonifiable
 
 
 @app.route('/', methods=['GET'])
