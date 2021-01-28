@@ -348,7 +348,11 @@ def evaluate(api_version,target):
             'exceptions': exceptions,
         }
 
-    return json.loads(json.dumps(r, cls=JSON_Improved)) # make jsonifiable
+    J = json.loads(json.dumps(r, cls=JSON_Improved)) # make jsonifiable
+
+    print("\033[34m", json.dumps(J, indent=4), "\033[0m")
+
+    return J 
 
 
 @app.route('/', methods=['GET'])
