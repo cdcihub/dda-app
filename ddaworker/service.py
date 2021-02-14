@@ -389,8 +389,8 @@ import traceback
 
 @app.errorhandler(Exception)
 def handle_any(e):
-    logger.warning(traceback.format_exc())
-    return 'bad request!', 400
+    logger.error(traceback.format_exc())
+    return 'Internal Error! We are working on it.', 400
 
 if __name__ == '__main__':
     try:
