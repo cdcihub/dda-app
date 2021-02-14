@@ -14,7 +14,7 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 
-from . import ddosaauth
+from . import ddaauth
 
 import logging
 from . import ddasentry
@@ -43,7 +43,9 @@ app = create_app()
 
 class JSON_Improved(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, dataanalysis.core.AnalysisDelegatedException):
+        if isinstance(obj, dataanalysis.core.AnalysisException):
+            return json.dumps(obj.__dict__)
+        elif isinstance(obj, dataanalysis.core.AnalysisDelegatedException):
             return json.dumps(obj.__dict__)
         else:
             return super().default(obj)
@@ -232,7 +234,7 @@ class Worker(object):
                     timestamp=timestamp()
                 ))
                 rundda_exception=Exception("rundda.py failed with code %i"%p.returncode)
-                print("\033[31mrunning workflow failed\033[0m")
+                print("\033[33mrunning workflow failed somehow\033[0m")
                 dlog("rundda returned",return_code=p.returncode,output=self.all_output)
 
             try:
@@ -300,7 +302,7 @@ class Worker(object):
 the_one_worker=Worker()
 
 @app.route('/api/<string:api_version>/<string:target>', methods=['GET'])
-@ddosaauth.requires_auth
+@ddaauth.requires_auth
 def evaluate(api_version,target):
     print("args",request.args)
 
