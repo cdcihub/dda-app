@@ -245,7 +245,8 @@ class Worker(object):
             
             try:
                 exceptions=yaml.load(open("exception.yaml"), Loader=yaml.Loader)
-                dlog("rundda exception",exceptions=exceptions)
+                print("\033[33mrunning workflow exception:\033[0m")
+                print("\033[33mrundda exception:\033[0m", exceptions)
             except Exception as e:
                 if rundda_exception is not None:
                     print("unable to read exception while rundda failed",e)
@@ -275,12 +276,21 @@ class Worker(object):
                 dlog(report['action'],**report)
             else:
                 #ddasentry.client.captureMessage('Something went fundamentally wrong')
-                report=dict(action="warning: returning",data=d,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,exceptions=exceptions,hostname=socket.gethostname())
+                report=dict(action="warning: returning exceptions", 
+                            data=d,
+                            target=target,
+                            modules=modules,
+                            assume=assume,
+                            inject=inject,
+                            client=client,
+                            token=token,
+                            exceptions=exceptions,
+                            hostname=socket.gethostname())
                 #ddalogzio.logger.warning(report)
                 dlog(report['action'],**report)
             return self.all_output,d,h,cps,exceptions
         except Exception as e:
-            print("exceptions:",e)
+            print("exception:", e)
             print(traceback.format_exc())
             if self.all_output=="":
                 self.all_output=p.stdout.read()
