@@ -189,7 +189,7 @@ class Worker(object):
             cmd+=["-i",inj_fn]
 
         if prompt_delegate:
-            cmd+=["-D",os.environ["ODAHUB"]]
+            cmd += ["-D",os.environ["ODAHUB"]]
 
         if callback is not None:
             print("callback:",callback)
@@ -301,7 +301,14 @@ class Worker(object):
                 timestamp=timestamp()
             ))
 
-            r=dict(status='ERROR',exception=repr(e),output=self.all_output.decode())
+            if isinstance(self.all_output, bytes):
+                all_output = self.all_output.decode()
+            else:
+                all_output = self.all_output
+
+            r = dict(status='ERROR',
+                     exception=repr(e),
+                     output=all_output)
             
             report=dict(action="exception: returning",data=r,target=target,modules=modules,assume=assume,inject=inject,client=client,token=token,hostname=socket.gethostname())
             #ddalogzio.logger.error(report)
@@ -336,9 +343,12 @@ def evaluate(api_version,target):
     if 'callback' in request.args:
         callback = request.args['callback']
 
-    #if api_version == "v2.0":
-    prompt_delegate=True
-
+    if os.environ.get("DDA_DISABLE_ASYNC", "no") == "yes":
+        logger.warning("\033[31mdisabling async in request of DDA_DISABLE_ASYNC variable!\033[0m")
+        prompt_delegate = False
+    else:
+        logger.warning("\033[32mNOT disabling async in request of DDA_DISABLE_ASYNC variable!\033[0m")
+        prompt_delegate = True
 
     result, data, hashe, cached_path, exceptions = the_one_worker.run_dda(
         target,

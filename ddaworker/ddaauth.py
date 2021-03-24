@@ -11,6 +11,7 @@ def get_server_auth():
     for n,m in [
             ('env', lambda:os.environ.get("DDA_INTERFACE_TOKEN").strip()),
             ('homefile', lambda:open(os.environ['HOME']+"/.secret-ddosa-server").read().strip()),
+            ('homefile', lambda:open(os.environ['HOME']+"/.secret-dda-server").read().strip()),
            ]:
         try:
             r = 'remoteintegral', m()
