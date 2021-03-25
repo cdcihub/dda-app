@@ -140,7 +140,6 @@ class Worker(object):
         silentremove("reduced_hashe.txt")
         silentremove("object_url.txt")
 
-        #ddalogzio.logger.info(dict(action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback))
         dlog("requested",action="requested",target=target,modules=modules,assume=assume,inject=inject,client=client,token=client,hostname=socket.gethostname(),callback=callback)
 
         #TODO: try datalake here
@@ -346,6 +345,7 @@ def evaluate(api_version,target):
     if os.environ.get("DDA_DISABLE_ASYNC", "no") == "yes":
         logger.warning("\033[31mdisabling async in request of DDA_DISABLE_ASYNC variable!\033[0m")
         prompt_delegate = False
+        callback = None
     else:
         logger.warning("\033[32mNOT disabling async in request of DDA_DISABLE_ASYNC variable!\033[0m")
         prompt_delegate = True
