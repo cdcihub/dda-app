@@ -349,15 +349,15 @@ the_one_worker = Worker()
 
 @app.route('/api/<string:api_version>/<string:target>', methods=['GET', 'POST'])
 @ddaauth.requires_auth
-def evaluate(api_version, target):
-    print("args", request.args)
-
+def evaluate(api_version, target):    
     if request.method == 'GET':
         args = request.args
     elif request.method == 'POST':
         args = request.values        
     else:
         raise NotImplementedError
+
+    print(f"\033[34mraw args for method {request.method} {json.dumps(args, indent=4, sort_keys=True)} \033[0m")
 
     if 'modules' in args:
         modules = args['modules'].split(",")
