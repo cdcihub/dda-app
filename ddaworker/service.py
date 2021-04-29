@@ -195,7 +195,16 @@ class Worker(object):
             dlog("setting callback",callback=callback)
             cmd+=["--callback",callback]
 
-        print("$ "+" ".join(cmd))
+        try:        
+            print("\033[31m$ "+" ".join(cmd),"\033[0m")
+        except TypeError:
+            print("failed to build command", cmd)
+            raise
+    
+        if target == "echo_cmd":            
+            #  result, data, hashe, cached_path, exceptions
+            return cmd, None, None, None, None
+
         p=subprocess.Popen(cmd,stderr=subprocess.STDOUT,stdout=subprocess.PIPE)
 
         self.all_output=""
@@ -317,30 +326,36 @@ class Worker(object):
 
 the_one_worker=Worker()
 
-@app.route('/api/<string:api_version>/<string:target>', methods=['GET'])
+@app.route('/api/<string:api_version>/<string:target>', methods=['GET', 'POST'])
 @ddaauth.requires_auth
 def evaluate(api_version,target):
     print("args",request.args)
 
-    modules=[]
-    if 'modules' in request.args:
-        modules+=request.args['modules'].split(",")
+    if request.method == 'GET':
+        args = request.args
+    elif request.method == 'POST':
+        args = request.form
+    else:
+        raise NotImplemented
 
-    assume=""
-    if 'assume' in request.args:
-        assume=request.args['assume']
+    if 'modules' in args:
+        modules = args['modules'].split(",")
+    else:
+        modules = []
+    print(f'\033[32mmodules: {modules}\033[0m')
 
-    inject=[]
-    if 'inject' in request.args:
-        inject=json.loads(request.args['inject'])
+    assume = args.get('assume', "")
+    print(f'\033[32massume: {repr(modules)[:300]}\033[0m')
 
-    token=None
-    if 'token' in request.args:
-        token=request.args['token']
+    inject = json.loads(args.get('inject', '[]'))
+    print(f'\033[32minject: {repr(inject)[:300]}\033[0m')
 
-    callback = None
-    if 'callback' in request.args:
-        callback = request.args['callback']
+    token = args.get('token', None)
+    print(f'\033[32mtoken set: {token is None}\033[0m')
+
+    callback = args.get('callback', None)
+    print(f'\033[32mcallback: {callback}\033[0m')
+
 
     if os.environ.get("DDA_DISABLE_ASYNC", "no") == "yes":
         logger.warning("\033[31mdisabling async in request of DDA_DISABLE_ASYNC variable!\033[0m")
@@ -350,6 +365,7 @@ def evaluate(api_version,target):
         logger.warning("\033[32mNOT disabling async in request of DDA_DISABLE_ASYNC variable!\033[0m")
         prompt_delegate = True
 
+    
     result, data, hashe, cached_path, exceptions = the_one_worker.run_dda(
         target,
         modules,
