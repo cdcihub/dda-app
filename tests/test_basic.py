@@ -20,11 +20,18 @@ def test_poke(client):
     r = client.get(url_for('poke'))
     assert r.status_code == 200
 
-@pytest.mark.parametrize('method', ['get', 'post'])
+@pytest.mark.parametrize('method', ['get', 'post', 'post-data'])
 def test_evaluate(client, auth_header, method):
-    r = getattr(client, method)(url_for('evaluate', api_version="v2.0", target="echo_cmd", assume=test_assumption, modules=test_modules),
-                   headers=auth_header
-                  )
+
+    if method == 'post-data':
+        r = client.post(url_for('evaluate', api_version="v2.0", target="echo_cmd", ),
+                    data=dict(assume=test_assumption, modules=test_modules),
+                    headers=auth_header
+                    )
+    elif method in [ 'post', 'get' ]:
+        r = getattr(client, method)(url_for('evaluate', api_version="v2.0", target="echo_cmd", assume=test_assumption, modules=test_modules),
+                    headers=auth_header
+                    )
 
     print(r)
 
