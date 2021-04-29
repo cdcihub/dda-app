@@ -357,6 +357,9 @@ def evaluate(api_version, target):
     else:
         raise NotImplementedError
 
+    print(f"\033[34mraw data for method {request.method} {request.data} \033[0m")
+    print(f"\033[34mraw form for method {request.method} {json.dumps(request.form, indent=4, sort_keys=True)} \033[0m")
+    print(f"\033[34mraw json for method {request.method} {json.dumps(request.json, indent=4, sort_keys=True)} \033[0m")
     print(f"\033[34mraw args for method {request.method} {json.dumps(args, indent=4, sort_keys=True)} \033[0m")
 
     if 'modules' in args:
