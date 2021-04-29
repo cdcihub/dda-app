@@ -47,6 +47,12 @@ def create_app():
 
 app = create_app()
 
+class RequestNotUnderstood(Exception):
+    def __init__(self, message):
+        self._message = message
+
+    def __repr__(self):
+        return "[ {self.__class__.__name__}: {self.message} ]"
 
 class JSON_Improved(json.JSONEncoder):
     def default(self, obj):
@@ -350,17 +356,24 @@ the_one_worker = Worker()
 @app.route('/api/<string:api_version>/<string:target>', methods=['GET', 'POST'])
 @ddaauth.requires_auth
 def evaluate(api_version, target):    
+    print(f"\033[34mraw data for method {request.method} {request.data[:300]} \033[0m")
+    print(f"\033[34mraw form for method {request.method} {json.dumps(request.form, indent=4, sort_keys=True)[:300]} \033[0m")
+    print(f"\033[34mraw json for method {request.method} {json.dumps(request.json, indent=4, sort_keys=True)[:300]} \033[0m")
+    print(f"\033[34mraw args for method {request.method} {json.dumps(request.args, indent=4, sort_keys=True)[:300]} \033[0m")
+
     if request.method == 'GET':
         args = request.args
-    elif request.method == 'POST':
-        args = request.values        
+    elif request.method == 'POST':        
+        args = request.values     
+
+        if len(args) == 0:
+            try:
+                args = json.loads(request.data.decode())
+            except json.JSONDecodeError:
+                raise 
     else:
         raise NotImplementedError
 
-    print(f"\033[34mraw data for method {request.method} {request.data} \033[0m")
-    print(f"\033[34mraw form for method {request.method} {json.dumps(request.form, indent=4, sort_keys=True)} \033[0m")
-    print(f"\033[34mraw json for method {request.method} {json.dumps(request.json, indent=4, sort_keys=True)} \033[0m")
-    print(f"\033[34mraw args for method {request.method} {json.dumps(args, indent=4, sort_keys=True)} \033[0m")
 
     if 'modules' in args:
         modules = args['modules'].split(",")
@@ -448,6 +461,10 @@ def version():
         ),
     ))
 
+@app.errorhandler(RequestNotUnderstood)
+def handle_any(e):
+    logger.error(traceback.format_exc())
+    return repr(RequestNotUnderstood), 400
 
 @app.errorhandler(Exception)
 def handle_any(e):

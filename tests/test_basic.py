@@ -1,4 +1,5 @@
 import pytest
+import json
 
 from flask import url_for
 import pprint
@@ -20,12 +21,17 @@ def test_poke(client):
     r = client.get(url_for('poke'))
     assert r.status_code == 200
 
-@pytest.mark.parametrize('method', ['get', 'post', 'post-data'])
+@pytest.mark.parametrize('method', ['get', 'post', 'post-data', 'post-json'])
 def test_evaluate(client, auth_header, method):
 
-    if method == 'post-data':
+    if method == 'post-json':
         r = client.post(url_for('evaluate', api_version="v2.0", target="echo_cmd", ),
-                    data=dict(assume=test_assumption, modules=test_modules),
+                    data=json.dumps(dict(assume=test_assumption, modules=test_modules)),
+                    headers=auth_header
+                    )
+    elif method == 'post-data':
+        r = client.post(url_for('evaluate', api_version="v2.0", target="echo_cmd", ),
+                    data=json.dumps(dict(assume=test_assumption, modules=test_modules)),
                     headers=auth_header
                     )
     elif method in [ 'post', 'get' ]:
