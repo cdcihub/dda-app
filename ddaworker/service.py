@@ -13,9 +13,7 @@ import glob
 
 import yaml
 import urllib.parse
-from flask import Flask
-from flask import request
-from flask import jsonify
+from flask import Flask, send_file, request, jsonify, safe_join
 
 from . import auth
 from . import sentry
@@ -344,10 +342,7 @@ class Worker(object):
 
 the_one_worker = Worker()
 
-
-@app.route('/api/<string:api_version>/<string:target>', methods=['GET', 'POST'])
-@auth.requires_auth
-def evaluate(api_version, target):
+def normalized_args():
     print(
         f"\033[34mraw data for method {request.method} {request.data[:300]} \033[0m")
     print(
@@ -370,10 +365,45 @@ def evaluate(api_version, target):
     else:
         raise NotImplementedError
 
+
+    return args
+
+
+
+@app.route('/api/<string:api_version>/fetch-file', methods=['GET', 'POST'])
+@auth.requires_auth
+def fetch_ddcache_file(api_version):
+    args = normalized_args()
+
+    cached_path = args['cached_path']
+    filename = args['filename']
+
+    file_path_base = os.path.join(cached_path, filename)
+
+    file_path_options = [ file_path_base, file_path_base+".gz" ]
+    file_path = None
+
+    for fp in file_path_options:
+        if os.path.exists(fp):
+            file_path = fp
+            break     
+        
+    if file_path is None:
+        raise RequestNotUnderstood(f"file does not exist, tried {file_path_options}")
+            
+    return send_file(file_path, as_attachment=True)
+
+
+@app.route('/api/<string:api_version>/<string:target>', methods=['GET', 'POST'])
+@auth.requires_auth
+def evaluate(api_version, target):
+    # it has to be clear that this allows arbitrary execution on the service, by design. It is a service to executing arbitrary workflows after all
+    args = normalized_args()
+
     return_file_contents = args.pop('return_file_contents', False)
 
     if return_file_contents:
-        print(f'\033[31mreturn_file_contents \033[32mREQUESTED\033[0m')
+        print(f'\033[31mreturn_file_contents is not supported but \033[32mREQUESTED\033[0m')
     else:
         print(f'\033[31mreturn_file_contents NOT\033[0m')
 

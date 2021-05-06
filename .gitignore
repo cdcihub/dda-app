@@ -1,3 +1,11 @@
 __pycache__
 *.gpg
 log
+.vscode
+DDATest
+DDATest_command_line
+exception.yaml
+filecache
+graph.dot
+graph.png
+returned_data_file.json

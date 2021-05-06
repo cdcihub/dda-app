@@ -2,6 +2,7 @@ import pytest
 import json
 import random
 import time
+import io
 
 from flask import url_for
 import pprint
@@ -53,8 +54,8 @@ def test_evaluate(client, auth_header, method):
 
 
 
-@pytest.mark.parametrize('return_file_contents', [True, False])
-def test_dda_module(client, auth_header, return_file_contents):
+#@pytest.mark.parametrize('return_file_contents', [True, False])
+def test_dda_module(client, auth_header):
 
     random_version = "{}.{}".format(
         time.strftime("%Y%m%d.%H%M%S%s"),
@@ -65,10 +66,9 @@ def test_dda_module(client, auth_header, return_file_contents):
                 data=json.dumps(dict(
                     assume=f"ddatest.DDATest(use_version='{random_version}')", 
                     modules="ddatest",
-                    return_file_contents=return_file_contents,
                     )),
                 headers=auth_header
-                )    
+                )        
 
     print(r)
 
@@ -78,7 +78,25 @@ def test_dda_module(client, auth_header, return_file_contents):
 
     print(data)
 
-    #print(r.json['result'])
+    for k, v in data['data'].items():
 
-    #assert f'-a {test_assumption}' in " ".join(r.json['result'])
-    #assert f'-m {test_modules}' in " ".join(r.json['result'])
+        if isinstance(v, list) and len(v) > 0 and v[0] == "DataFile":
+            print("found file:", k, v)                
+            
+            r = client.get(url_for('fetch_ddcache_file', api_version="v2.0", target="DDATest", 
+                        cached_path=data['cached_path'],
+                        filename=v[1]
+                        ),
+                    headers=auth_header
+                    )
+
+            print(r, r.data)
+            
+            fn = "returned_data_file.json"
+
+            open(fn, "wb").write(r.data)
+            
+#            print(json.load(open(fn)))
+
+
+ 
