@@ -2,7 +2,7 @@ import re
 import os
 import mattersend
 
-from .ddalog import dlog
+from .log import dlog
 
 def mattermost_send(url_params, 
                     client, 

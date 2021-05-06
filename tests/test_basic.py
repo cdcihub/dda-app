@@ -1,5 +1,7 @@
 import pytest
 import json
+import random
+import time
 
 from flask import url_for
 import pprint
@@ -48,3 +50,35 @@ def test_evaluate(client, auth_header, method):
 
     assert f'-a {test_assumption}' in " ".join(r.json['result'])
     assert f'-m {test_modules}' in " ".join(r.json['result'])
+
+
+
+@pytest.mark.parametrize('return_file_contents', [True, False])
+def test_dda_module(client, auth_header, return_file_contents):
+
+    random_version = "{}.{}".format(
+        time.strftime("%Y%m%d.%H%M%S%s"),
+        random.random()
+    )
+
+    r = client.post(url_for('evaluate', api_version="v2.0", target="DDATest", ),
+                data=json.dumps(dict(
+                    assume=f"ddatest.DDATest(use_version='{random_version}')", 
+                    modules="ddatest",
+                    return_file_contents=return_file_contents,
+                    )),
+                headers=auth_header
+                )    
+
+    print(r)
+
+    assert r.status_code == 200
+
+    data = r.json
+
+    print(data)
+
+    #print(r.json['result'])
+
+    #assert f'-a {test_assumption}' in " ".join(r.json['result'])
+    #assert f'-m {test_modules}' in " ".join(r.json['result'])

@@ -20,6 +20,7 @@ from flask import jsonify
 from . import auth
 from . import sentry
 from . import logstash
+from .notifications import mattermost_send
 
 from .log import dlog
 
@@ -40,12 +41,14 @@ def create_app():
 
 app = create_app()
 
+
 class RequestNotUnderstood(Exception):
     def __init__(self, message):
         self._message = message
 
     def __repr__(self):
         return "[ {self.__class__.__name__}: {self.message} ]"
+
 
 class JSON_Improved(json.JSONEncoder):
     def default(self, obj):
@@ -85,7 +88,9 @@ class Worker(object):
         )
 
     def run_dda(self, target, modules, assume, inject, client=None, token=None,
-                prompt_delegate=False, callback=None):
+                prompt_delegate=False, callback=None,
+                return_file_contents=False,
+                ):
 
         cwd = os.getcwd()
         nwd = os.path.join(cwd,
@@ -106,6 +111,7 @@ class Worker(object):
             os.chdir(cwd)
             return R
         except Exception as e:
+            dlog(f"exception in dda-run: {repr(e)}", level="ERROR")
             os.chdir(cwd)
             raise
 
@@ -159,25 +165,14 @@ class Worker(object):
         except:
             url_params = {'session_id': '?', 'job_id': '?'}
 
-        try:
-            mattersend.send(
-                channel="request-log",
-                message="|...|...|\n" +
-                "|------------: |:---------------|\n" +
-                "|sessionid|"+repr(url_params['session_id'])+"|\n" +
-                "|jobid|"+repr(url_params['job_id'])+"|\n" +
-                "|requested|"+repr(client)+"|\n" +
-                "|target|"+repr(target)+"|\n" +
-                "|modules|"+repr(modules)+"|\n" +
-                "|assume|"+re.sub(" +", " ", repr(assume))+"|\n" +
-                "|inject|"+repr(inject)+"|\n",
-                url=open(os.environ.get("HOME") +
-                         "/.mattermost-request-log-hook").read().strip(),
-                # syntax="markdown",
-            )
-        except Exception as e:
-            dlog("mattermost problem", action="requested", exception=repr(e))
-            # ddasentry.client.captureException()
+        mattermost_send(url_params,
+                        client,
+                        target,
+                        modules,
+                        assume,
+                        inject
+                        )
+
 
         # it's peculiar but it is a level of isolation
         cmd = ["rundda.py", target, "-j", "-c"]
@@ -259,10 +254,11 @@ class Worker(object):
                      output=self.all_output)
 
             try:
-                d = json.load(open("object_data.json"))
-            except:
+                object_data = json.load(open("object_data.json"))
+            except Exception as e:
+                print(f"unable to read object data: {repr(e)}")
                # ddasentry.client.captureException()
-                d = "unreadable-object-data"
+                object_data = "unreadable-object-data"
 
             try:
                 exceptions = yaml.load(
@@ -278,31 +274,32 @@ class Worker(object):
                     print("no exceptions")
 
             try:
-                h = open("reduced_hashe.txt").read()
+                reduced_hashe = open("reduced_hashe.txt").read()
             except:
                 # ddasentry.client.captureException()
                 print(
                     "\033[31mERROR reading reduced_hashe.txt\033[0m, have", glob.glob("*"))
-                h = "unreable"
+                reduced_hashe = "unreable"
 
             try:
-                cps = [l.split()[1] for l in open("object_url.txt")]
-                print("\033[32mSUCCESS reading object_url.txt\033[0m, have", cps)
+                object_urls = [l.split()[1] for l in open("object_url.txt")]
+                print(
+                    "\033[32mSUCCESS reading object_url.txt\033[0m, have", object_urls)
             except:
                 # ddasentry.client.captureException()
                 print(
                     "\033[31mERROR reading object_url.txt\033[0m, have", glob.glob("*"))
-                cps = "unreable"
+                object_urls = "unreable"
 
             if len(exceptions) == 0:
-                report = dict(action="success: returning", data=d, target=target, modules=modules, assume=assume,
+                report = dict(action="success: returning", data=object_data, target=target, modules=modules, assume=assume,
                               inject=inject, client=client, token=token, exceptions=exceptions, hostname=socket.gethostname())
                 # ddalogzio.logger.info(report)
                 dlog(report['action'], **report)
             else:
                 #ddasentry.client.captureMessage('Something went fundamentally wrong')
                 report = dict(action="warning: returning exceptions",
-                              data=d,
+                              data=object_data,
                               target=target,
                               modules=modules,
                               assume=assume,
@@ -311,9 +308,11 @@ class Worker(object):
                               token=token,
                               exceptions=exceptions,
                               hostname=socket.gethostname())
-                # ddalogzio.logger.warning(report)
+
                 dlog(report['action'], **report)
-            return self.all_output, d, h, cps, exceptions
+
+            return self.all_output, object_data, reduced_hashe, object_urls, exceptions
+
         except Exception as e:
             print("exception:", e)
             print(traceback.format_exc())
@@ -348,25 +347,35 @@ the_one_worker = Worker()
 
 @app.route('/api/<string:api_version>/<string:target>', methods=['GET', 'POST'])
 @auth.requires_auth
-def evaluate(api_version, target):    
-    print(f"\033[34mraw data for method {request.method} {request.data[:300]} \033[0m")
-    print(f"\033[34mraw form for method {request.method} {json.dumps(request.form, indent=4, sort_keys=True)[:300]} \033[0m")
-    print(f"\033[34mraw json for method {request.method} {json.dumps(request.json, indent=4, sort_keys=True)[:300]} \033[0m")
-    print(f"\033[34mraw args for method {request.method} {json.dumps(request.args, indent=4, sort_keys=True)[:300]} \033[0m")
+def evaluate(api_version, target):
+    print(
+        f"\033[34mraw data for method {request.method} {request.data[:300]} \033[0m")
+    print(
+        f"\033[34mraw form for method {request.method} {json.dumps(request.form, indent=4, sort_keys=True)[:300]} \033[0m")
+    print(
+        f"\033[34mraw json for method {request.method} {json.dumps(request.json, indent=4, sort_keys=True)[:300]} \033[0m")
+    print(
+        f"\033[34mraw args for method {request.method} {json.dumps(request.args, indent=4, sort_keys=True)[:300]} \033[0m")
 
     if request.method == 'GET':
         args = request.args
-    elif request.method == 'POST':        
-        args = request.values     
+    elif request.method == 'POST':
+        args = request.values
 
         if len(args) == 0:
             try:
                 args = json.loads(request.data.decode())
             except json.JSONDecodeError:
-                raise 
+                raise
     else:
         raise NotImplementedError
 
+    return_file_contents = args.pop('return_file_contents', False)
+
+    if return_file_contents:
+        print(f'\033[31mreturn_file_contents \033[32mREQUESTED\033[0m')
+    else:
+        print(f'\033[31mreturn_file_contents NOT\033[0m')
 
     if 'modules' in args:
         modules = args['modules'].split(",")
@@ -405,6 +414,7 @@ def evaluate(api_version, target):
         token=token,
         prompt_delegate=prompt_delegate,
         callback=callback,
+        return_file_contents=return_file_contents,
     )
 
     r = {
@@ -454,15 +464,17 @@ def version():
         ),
     ))
 
+
 @app.errorhandler(RequestNotUnderstood)
-def handle_any(e):
+def handle_RequestNotUnderstood(e):
     logger.error(traceback.format_exc())
     return repr(RequestNotUnderstood), 400
+
 
 @app.errorhandler(Exception)
 def handle_any(e):
     logger.error(traceback.format_exc())
-    return 'Internal Error! We are working on it.', 400
+    return 'Internal Error! We are working on it. Please contact me@odahub.io if necessary', 400
 
 
 if __name__ == '__main__':
