@@ -2,7 +2,7 @@ import pytest
 import base64
 
 import ddaworker.service
-import ddaworker.ddaauth 
+import ddaworker.auth 
 
 @pytest.fixture
 def app():
@@ -11,7 +11,7 @@ def app():
 
 @pytest.fixture
 def auth():
-    return ddaworker.ddaauth.get_server_auth()
+    return ddaworker.auth.get_server_auth()
 
 @pytest.fixture
 def auth_header(auth):

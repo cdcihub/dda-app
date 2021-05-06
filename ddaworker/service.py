@@ -17,25 +17,18 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 
-from . import ddaauth
+from . import auth
+from . import sentry
+from . import logstash
+
+from .log import dlog
 
 import logging
-from . import ddasentry
-#import ddalogzio
-from . import ddalogstash
 import mattersend
 
 import dataanalysis.core
 
 logger = logging.getLogger(__name__)
-
-
-def dlog(*a, **aa):
-    level = logging.INFO
-    if 'level' in aa:
-        level = aa.pop('level')
-    message = "; ".join(a)
-    ddalogstash.logger.log(level, message, extra=aa)
 
 
 context = socket.gethostname()
@@ -354,7 +347,7 @@ the_one_worker = Worker()
 
 
 @app.route('/api/<string:api_version>/<string:target>', methods=['GET', 'POST'])
-@ddaauth.requires_auth
+@auth.requires_auth
 def evaluate(api_version, target):    
     print(f"\033[34mraw data for method {request.method} {request.data[:300]} \033[0m")
     print(f"\033[34mraw form for method {request.method} {json.dumps(request.form, indent=4, sort_keys=True)[:300]} \033[0m")
