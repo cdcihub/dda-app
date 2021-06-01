@@ -504,7 +504,7 @@ def handle_RequestNotUnderstood(e):
 @app.errorhandler(Exception)
 def handle_any(e):
     logger.error(traceback.format_exc())
-    return 'Internal Error! We are working on it. Please contact me@odahub.io if necessary', 400
+    return f'Internal Error! We are working on it. Please contact me@odahub.io if necessary; {traceback.format_exc()}', 400
 
 
 if __name__ == '__main__':
